@@ -1,9 +1,10 @@
-import { Alert, Badge, ButtonLink, Card, Divider, Icon, Logo } from "@kahade/ui";
+import { Alert, Badge, ButtonLink, Card, Divider, EmptyState, Icon, Logo } from "@kahade/ui";
 import {
   ArrowSquareOut,
   CheckCircle,
   Headset,
   Rss,
+  Wrench,
 } from "@phosphor-icons/react/dist/ssr";
 import {
   incidents,
@@ -310,14 +311,11 @@ export default function StatusPage() {
           </h2>
           <Card className="mt-4 p-0">
             {maintenances.length === 0 ? (
-              <div className="flex flex-col items-center px-6 py-10 text-center">
-                <p className="font-semibold text-black">
-                  Belum ada pemeliharaan terjadwal
-                </p>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Jadwal pemeliharaan akan diumumkan di sini sebelumnya.
-                </p>
-              </div>
+              <EmptyState
+                icon={Wrench}
+                title="Belum ada pemeliharaan terjadwal"
+                description="Jadwal pemeliharaan akan diumumkan di sini sebelumnya."
+              />
             ) : (
               <ul className="divide-y divide-neutral-100">
                 {maintenances.map((m) => {
@@ -370,12 +368,12 @@ export default function StatusPage() {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <ButtonLink href="/feed.xml">Feed RSS</ButtonLink>
-                  <a
+                  <ButtonLink
+                    variant="secondary"
                     href="mailto:halo@kahade.id?subject=Berlangganan%20pembaruan%20status%20Kahade"
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-neutral-300 bg-white px-6 text-sm font-semibold text-black transition-all duration-150 hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 active:scale-[0.97]"
                   >
                     Daftar via email
-                  </a>
+                  </ButtonLink>
                 </div>
               </div>
             </Card>
