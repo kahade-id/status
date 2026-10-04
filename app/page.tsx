@@ -1,4 +1,4 @@
-import { Alert, Badge, Card, Divider, Icon, Logo } from "@kahade/ui";
+import { Alert, Badge, ButtonLink, Card, Divider, Icon, Logo } from "@kahade/ui";
 import {
   ArrowSquareOut,
   CheckCircle,
@@ -16,7 +16,7 @@ import {
   type Service,
   type ServiceStatus,
 } from "@/lib/status";
-import { ButtonLink } from "@/components/ButtonLink";
+
 
 const serviceStatusMeta: Record<
   ServiceStatus,

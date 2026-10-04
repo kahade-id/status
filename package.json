@@ -1,17 +1,18 @@
 {
   "dependencies": {
-    "@kahade/ui": "github:kahade-id/design-system#v0.4.3",
+    "@kahade/ui": "github:kahade-id/design-system#v0.5.0",
     "@phosphor-icons/react": "^2.1.10",
     "next": "^16.3.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3"
   },
-  "description": "Halaman status layanan Kahade \u2014 status.kahade.id",
+  "description": "Halaman status layanan Kahade — status.kahade.id",
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.3.0",
     "typescript": "^5.9.2"
   },
   "name": "kahade-status",

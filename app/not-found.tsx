@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
-import { EmptyState, Logo } from "@kahade/ui";
-import { ButtonLink } from "@/components/ButtonLink";
+import { ButtonLink, EmptyState, Logo } from "@kahade/ui";
 
 export const metadata: Metadata = {
   title: "Halaman tidak ditemukan — Kahade",
