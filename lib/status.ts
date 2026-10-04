@@ -14,7 +14,7 @@
  * - `overall`: "operational" bila semua layanan operasional, "degraded" bila
  *   ada yang degraded, "incident" bila ada insiden aktif.
  * - Pemeliharaan terjadwal: tambah di array `maintenances` (terdekat di atas).
- * - Semua tanggal/waktu dalam WIB. Format tanggal tampil: "4 Okt 2026".
+ * - Semua tanggal/waktu dalam WIB. Format tanggal tampil: "4 Oktober 2026".
  */
 
 export type ServiceStatus = "operational" | "degraded" | "down";
@@ -35,7 +35,7 @@ export interface Service {
 }
 
 export interface Incident {
-  /** Format: "4 Okt 2026" (WIB). */
+  /** Format: "4 Oktober 2026" (WIB). */
   date: string;
   /** Opsional: tanggal ISO untuk feed RSS, mis. "2026-10-04". */
   isoDate?: string;
@@ -46,7 +46,7 @@ export interface Incident {
 }
 
 export interface Maintenance {
-  /** Format: "10 Okt 2026, 01.00–03.00" (WIB). */
+  /** Format: "10 Oktober 2026, 01.00–03.00" (WIB). */
   date: string;
   /** Opsional: tanggal ISO untuk feed RSS, mis. "2026-10-10". */
   isoDate?: string;
@@ -58,7 +58,7 @@ export interface Maintenance {
 
 export const overall: { status: OverallStatus; updatedAt: string } = {
   status: "operational",
-  updatedAt: "4 Okt 2026",
+  updatedAt: "4 Oktober 2026",
 };
 
 export const services: Service[] = [

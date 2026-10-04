@@ -22,6 +22,9 @@ export default function NotFound() {
       </div>
       <EmptyState
         icon={MagnifyingGlass}
+        // Dimensi D audit batch 8: headingLevel=1 agar halaman 404 punya
+        // satu h1 sungguhan ("Halaman tidak ditemukan").
+        headingLevel={1}
         title="Halaman tidak ditemukan"
         description="Alamat yang kamu tuju tidak ada atau sudah dipindahkan."
         action={

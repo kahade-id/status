@@ -234,7 +234,10 @@ export default function StatusPage() {
           >
             Layanan
           </h2>
-          <Card className="mt-4 p-0">
+          {/* Audit batch 8 (A.1): p-0 di className TIDAK menimpa p-6 bawaan
+              Card di Tailwind v4 (.p-6 ter-generate setelah .p-0) — pakai
+              inline style agar baris daftar benar-benar edge-to-edge. */}
+          <Card className="mt-4" style={{ padding: 0 }}>
             <ul className="divide-y divide-neutral-100">
               {services.map((s) => (
                 <ServiceRow key={s.name} service={s} />
@@ -300,7 +303,7 @@ export default function StatusPage() {
           >
             Riwayat insiden
           </h2>
-          <Card className="mt-4 p-0">
+          <Card className="mt-4" style={{ padding: 0 }}>
             {incidents.length === 0 ? (
               <EmptyState
                 icon={CheckCircle}
@@ -328,7 +331,7 @@ export default function StatusPage() {
           >
             Jadwal pemeliharaan
           </h2>
-          <Card className="mt-4 p-0">
+          <Card className="mt-4" style={{ padding: 0 }}>
             {maintenances.length === 0 ? (
               <EmptyState
                 icon={Wrench}
