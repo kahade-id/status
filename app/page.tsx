@@ -158,6 +158,23 @@ function IncidentItem({ incident }: { incident: Incident }) {
   );
 }
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "PT Kawal Hak Dengan Aman",
+  url: "https://status.kahade.id",
+  logo: "https://status.kahade.id/favicon.svg",
+  sameAs: [
+    "https://kahade.id",
+    "https://karir.kahade.id",
+    "https://legal.kahade.id",
+    "https://bantuan.kahade.id",
+    "https://status.kahade.id",
+    "https://investor.kahade.id",
+    "https://artikel.kahade.id",
+  ],
+};
+
 export default function StatusPage() {
   const meta = overallMeta[overall.status];
   const alertVariant =
@@ -165,6 +182,12 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationJsonLd),
+        }}
+      />
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         {/* Header */}
         <header className="flex items-center gap-3">
