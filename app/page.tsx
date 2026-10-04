@@ -220,13 +220,34 @@ export default function StatusPage() {
 
         {/* Catatan kaki */}
         <footer className="text-center text-sm text-neutral-500">
+          <nav
+            aria-label="Situs Kahade"
+            className="mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+          >
+            {[
+              { label: "kahade.id", href: "https://kahade.id" },
+              { label: "Karir", href: "https://karir.kahade.id" },
+              { label: "Legalitas", href: "https://legal.kahade.id" },
+              { label: "Bantuan", href: "https://bantuan.kahade.id" },
+              { label: "Investor", href: "https://investor.kahade.id" },
+              { label: "Artikel", href: "https://artikel.kahade.id" },
+            ].map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="font-medium text-neutral-600 transition-colors hover:text-black"
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
           <p>
             Halaman ini diperbarui manual oleh tim Kahade. Butuh bantuan?{" "}
             <a
               href="https://bantuan.kahade.id"
               className="inline-flex items-center gap-1 font-semibold text-black underline-offset-4 hover:underline"
             >
-              Kunjungi pusat bantuan
+              Kunjungi Bantuan
               <Icon icon={ArrowSquareOut} size={14} />
             </a>
           </p>
