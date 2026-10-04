@@ -5,5 +5,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   return [
     { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/feed.xml`, lastModified: now, changeFrequency: "daily", priority: 0.5 },
   ];
 }

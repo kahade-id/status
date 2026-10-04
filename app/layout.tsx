@@ -38,6 +38,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link href={GOOGLE_FONTS_URL} rel="stylesheet" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Status Layanan Kahade"
+          href="/feed.xml"
+        />
       </head>
       <body>{children}</body>
     </html>
