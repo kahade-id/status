@@ -7,9 +7,11 @@
  * Panduan:
  * - `status` layanan: "operational" | "degraded" | "down"
  * - `uptime90d`: persentase string ("99.98%") atau null bila belum ada data.
+ *   JANGAN mengarang angka — null menampilkan "—".
  * - Insiden baru: tambahkan di AWAL array `incidents` (terbaru di atas).
  * - `overall`: "operational" bila semua layanan operasional, "degraded" bila
  *   ada yang degraded, "incident" bila ada insiden aktif.
+ * - Semua tanggal/waktu dalam WIB.
  */
 
 export type ServiceStatus = "operational" | "degraded" | "down";
@@ -19,12 +21,12 @@ export interface Service {
   name: string;
   description: string;
   status: ServiceStatus;
-  /** Uptime 90 hari, mis. "99.98%". null = belum ada data. */
+  /** Uptime 90 hari, mis. "99.98%". null = belum ada data (tampil "—"). */
   uptime90d: string | null;
 }
 
 export interface Incident {
-  /** Format bebas, mis. "4 Okt 2026". */
+  /** Format: "4 Okt 2026" (WIB). */
   date: string;
   title: string;
   /** "resolved" | "monitoring" | "investigating" */
@@ -76,13 +78,9 @@ export const services: Service[] = [
   },
 ];
 
-/** Urutan: insiden terbaru paling atas. */
-export const incidents: Incident[] = [
-  {
-    date: "4 Okt 2026",
-    title: "Dalam tahap pengembangan",
-    status: "monitoring",
-    description:
-      "Kahade masih dalam tahap pengembangan dan belum diluncurkan untuk publik. Peluncuran perdana dijadwalkan pada 8 Desember 2026. Belum ada insiden layanan yang tercatat.",
-  },
-];
+/**
+ * Urutan: insiden terbaru paling atas.
+ * Kosongkan array bila tidak ada insiden — halaman menampilkan
+ * status kosong "Belum ada insiden" secara otomatis.
+ */
+export const incidents: Incident[] = [];

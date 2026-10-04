@@ -1,5 +1,9 @@
 import { Alert, Badge, Card, Divider, Icon, Logo } from "@kahade/ui";
-import { ArrowSquareOut, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowSquareOut,
+  CheckCircle,
+  Headset,
+} from "@phosphor-icons/react/dist/ssr";
 import {
   incidents,
   overall,
@@ -93,7 +97,7 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         {/* Header */}
         <header className="flex items-center gap-3">
           <Logo size={36} />
@@ -112,10 +116,20 @@ export default function StatusPage() {
           <Alert variant={alertVariant} title={meta.title}>
             {meta.message}{" "}
             <span className="text-neutral-500">
-              Diperbarui {overall.updatedAt}.
+              Diperbarui {overall.updatedAt} (WIB).
             </span>
           </Alert>
         </div>
+
+        {/* Penjelasan halaman */}
+        <p className="mt-6 text-sm leading-relaxed text-neutral-500">
+          Halaman ini menampilkan kondisi terkini layanan Kahade. Kahade
+          masih dalam tahap pengembangan dan dijadwalkan meluncur pada{" "}
+          <span className="font-semibold text-neutral-700">
+            8 Desember 2026
+          </span>
+          . Semua waktu di halaman ini dalam WIB.
+        </p>
 
         {/* Daftar layanan */}
         <section aria-labelledby="layanan" className="mt-10">
@@ -175,6 +189,33 @@ export default function StatusPage() {
           </Card>
         </section>
 
+        {/* Lapor gangguan */}
+        <section aria-labelledby="lapor" className="mt-10">
+          <Card className="flex items-center gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100">
+              <Icon icon={Headset} size={22} className="text-neutral-700" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2
+                id="lapor"
+                className="font-bold tracking-tight text-black"
+              >
+                Mengalami gangguan?
+              </h2>
+              <p className="mt-0.5 text-sm text-neutral-500">
+                Laporkan kendala yang kamu alami ke tim Kahade melalui
+                pusat bantuan.
+              </p>
+            </div>
+            <a
+              href="https://bantuan.kahade.id/kontak"
+              className="shrink-0 rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 active:scale-[0.97]"
+            >
+              Lapor gangguan
+            </a>
+          </Card>
+        </section>
+
         <Divider className="my-10" />
 
         {/* Catatan kaki */}
@@ -190,12 +231,12 @@ export default function StatusPage() {
             </a>
           </p>
           <p className="mt-3 text-xs text-neutral-400">
-            © 2026 PT Kawal Hak Dengan Aman · Kahade adalah aplikasi
-            jual-beli pengguna ke pengguna yang tampilannya seperti media
-            sosial.
+            © {new Date().getFullYear()} PT Kawal Hak Dengan Aman · Kahade
+            adalah aplikasi jual-beli pengguna ke pengguna yang
+            tampilannya seperti media sosial.
           </p>
         </footer>
-      </div>
+      </main>
     </div>
   );
 }

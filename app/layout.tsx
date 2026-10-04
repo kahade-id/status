@@ -7,8 +7,20 @@ const GOOGLE_FONTS_URL =
 export const metadata: Metadata = {
   title: "Status Layanan — Kahade",
   description:
-    "Status operasional layanan Kahade: API, aplikasi mobile, dan situs web.",
+    "Status operasional layanan Kahade: API, aplikasi mobile, dan situs web. Diperbarui manual oleh tim Kahade.",
   metadataBase: new URL("https://status.kahade.id"),
+  icons: {
+    icon: "/favicon.svg",
+  },
+  themeColor: "#ffffff",
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    siteName: "Status Kahade",
+    title: "Status Layanan — Kahade",
+    description:
+      "Status operasional layanan Kahade: API, aplikasi mobile, dan situs web.",
+  },
 };
 
 export default function RootLayout({
