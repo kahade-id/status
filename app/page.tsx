@@ -237,7 +237,7 @@ export default function StatusPage() {
               ))}
             </ul>
             <div className="border-t border-neutral-100 px-5 py-3 sm:px-6">
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-neutral-500">
                 Grafik 90 hari · “—” berarti belum ada data pengukuran
               </p>
             </div>
@@ -298,19 +298,11 @@ export default function StatusPage() {
           </h2>
           <Card className="mt-4 p-0">
             {incidents.length === 0 ? (
-              <div className="flex flex-col items-center px-6 py-10 text-center">
-                <Icon
-                  icon={CheckCircle}
-                  size={32}
-                  className="text-neutral-300"
-                />
-                <p className="mt-3 font-semibold text-black">
-                  Belum ada insiden
-                </p>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Tidak ada insiden layanan yang tercatat.
-                </p>
-              </div>
+              <EmptyState
+                icon={CheckCircle}
+                title="Belum ada insiden"
+                description="Tidak ada insiden layanan yang tercatat."
+              />
             ) : (
               <ul className="divide-y divide-neutral-100">
                 {incidents.map((i) => (
@@ -457,7 +449,7 @@ export default function StatusPage() {
               <Icon icon={ArrowSquareOut} size={14} />
             </a>
           </p>
-          <p className="mt-3 text-xs text-neutral-400">
+          <p className="mt-3 text-xs text-neutral-500">
             © {new Date().getFullYear()} PT Kawal Hak Dengan Aman · Kahade
             adalah aplikasi jual-beli pengguna ke pengguna yang
             tampilannya seperti media sosial.

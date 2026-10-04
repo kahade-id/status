@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description:
     "Pantau status operasional layanan Kahade: API, aplikasi mobile, dan situs web. Lihat riwayat uptime, insiden, dan jadwal pemeliharaan.",
   metadataBase: new URL("https://status.kahade.id"),
+  alternates: {
+    // Canonical absolut (di-resolve dari metadataBase) — dimensi E audit.
+    canonical: "/",
+  },
   icons: {
     icon: "/favicon.svg",
   },
