@@ -1,3 +1,8 @@
 @import "tailwindcss";
 @import "@kahade/ui/tokens.css";
 @import "@kahade/ui/styles/base.css";
+
+/* WAJIB: Tailwind v4 tidak men-scan node_modules — tanpa ini, utility class
+   yang hanya dipakai di source @kahade/ui (mis. pl-11 di SearchField) tidak
+   ter-generate dan layout DS rusak diam-diam. */
+@source "../node_modules/@kahade/ui/src";
