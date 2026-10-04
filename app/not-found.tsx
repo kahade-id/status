@@ -1,7 +1,12 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { EmptyState, Logo } from "@kahade/ui";
 import { ButtonLink } from "@/components/ButtonLink";
+
+export const metadata: Metadata = {
+  title: "Halaman tidak ditemukan — Kahade",
+  description: "Alamat yang kamu tuju tidak ada atau sudah dipindahkan.",
+};
 
 export default function NotFound() {
   return (

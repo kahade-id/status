@@ -24,11 +24,14 @@ export async function GET(): Promise<Response> {
       title: `Insiden: ${i.title}`,
       description: i.description,
       pubDate: toRfc822(i.isoDate),
+      // Tanggal ikut di guid agar tetap unik bila dua insiden punya judul sama.
+      guid: `${BASE}/#${encodeURIComponent(`Insiden: ${i.title}`)}${i.isoDate ? `-${i.isoDate}` : ""}`,
     })),
     ...maintenances.map((m) => ({
       title: `Pemeliharaan: ${m.title}`,
       description: `${m.date} (WIB). ${m.description}`,
       pubDate: toRfc822(m.isoDate),
+      guid: `${BASE}/#${encodeURIComponent(`Pemeliharaan: ${m.title}`)}${m.isoDate ? `-${m.isoDate}` : ""}`,
     })),
   ];
 
@@ -37,7 +40,7 @@ export async function GET(): Promise<Response> {
       (item) => `    <item>
       <title>${escapeXml(item.title)}</title>
       <link>${BASE}/</link>
-      <guid>${BASE}/#${encodeURIComponent(item.title)}</guid>
+      <guid>${item.guid}</guid>
       <description>${escapeXml(item.description)}</description>${item.pubDate ? `\n      <pubDate>${item.pubDate}</pubDate>` : ""}
     </item>`,
     )
