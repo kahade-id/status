@@ -188,7 +188,11 @@ export default function StatusPage() {
           __html: JSON.stringify(organizationJsonLd),
         }}
       />
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      <main
+        id="konten"
+        tabIndex={-1}
+        className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14"
+      >
         {/* Header */}
         <header className="flex items-center gap-3">
           <Logo size={36} />

@@ -9,7 +9,11 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-5">
+    <main
+      id="konten"
+      tabIndex={-1}
+      className="flex min-h-screen flex-col items-center justify-center bg-white px-5"
+    >
       <div className="mb-6 flex items-center gap-2.5">
         <Logo size={26} />
         <span className="text-base font-extrabold tracking-tight text-black">
@@ -24,6 +28,6 @@ export default function NotFound() {
           <ButtonLink href="/">Kembali ke Status Layanan</ButtonLink>
         }
       />
-    </div>
+    </main>
   );
 }

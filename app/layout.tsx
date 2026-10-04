@@ -24,6 +24,14 @@ export const metadata: Metadata = {
     description:
       "Status operasional layanan Kahade: API, aplikasi mobile, dan situs web — beserta riwayat insiden.",
   },
+  // Dimensi D audit: twitter card lengkap (twitter:image diambil otomatis
+  // dari opengraph-image.tsx oleh Next.js).
+  twitter: {
+    card: "summary_large_image",
+    title: "Status Layanan Kahade — Uptime & Insiden",
+    description:
+      "Status operasional layanan Kahade: API, aplikasi mobile, dan situs web — beserta riwayat insiden.",
+  },
 };
 
 export const viewport: Viewport = {
@@ -52,7 +60,17 @@ export default function RootLayout({
           href="/feed.xml"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Dimensi A2 audit: skip-to-content link. Target #konten ada di
+            page.tsx, not-found.tsx, dan error.tsx. */}
+        <a
+          href="#konten"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-black focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white"
+        >
+          Lewati ke konten utama
+        </a>
+        {children}
+      </body>
     </html>
   );
 }
