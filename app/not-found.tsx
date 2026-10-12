@@ -1,36 +1,26 @@
 import type { Metadata } from "next";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, EmptyState, Logo } from "@kahade/ui";
+import { ButtonLink, Container, EmptyState } from "@kahade/ui";
 
 export const metadata: Metadata = {
   title: "Halaman tidak ditemukan — Kahade",
   description: "Alamat yang kamu tuju tidak ada atau sudah dipindahkan.",
 };
 
+/**
+ * Halaman 404: di-render DI DALAM root layout (SiteHeader + SiteFooter sudah
+ * tersedia) — hanya isi konten. headingLevel=1 agar ada satu h1 sungguhan.
+ */
 export default function NotFound() {
   return (
-    <main
-      id="konten"
-      tabIndex={-1}
-      className="flex min-h-screen flex-col items-center justify-center bg-white px-5"
-    >
-      <div className="mb-6 flex items-center gap-2.5">
-        <Logo size={26} />
-        <span className="text-base font-extrabold tracking-tight text-black">
-          Status Kahade
-        </span>
-      </div>
+    <Container className="flex min-h-[60vh] items-center justify-center py-16">
       <EmptyState
         icon={MagnifyingGlass}
-        // Dimensi D audit batch 8: headingLevel=1 agar halaman 404 punya
-        // satu h1 sungguhan ("Halaman tidak ditemukan").
         headingLevel={1}
         title="Halaman tidak ditemukan"
         description="Alamat yang kamu tuju tidak ada atau sudah dipindahkan."
-        action={
-          <ButtonLink href="/">Kembali ke Status Layanan</ButtonLink>
-        }
+        action={<ButtonLink href="/">Kembali ke status layanan</ButtonLink>}
       />
-    </main>
+    </Container>
   );
 }

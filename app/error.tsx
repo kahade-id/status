@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { ArrowLeft, WarningCircle } from "@phosphor-icons/react/dist/ssr";
-import { Button, ButtonLink, EmptyState, Logo } from "@kahade/ui";
+import { WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { Button, ButtonLink, Container, EmptyState } from "@kahade/ui";
 
 /**
  * Error boundary rute: tampil saat ada galat client-side di halaman status.
- * Copy Bahasa Indonesia + tombol "Coba lagi" (reset) sesuai dimensi C audit.
+ * Di-render di dalam root layout (header & footer DS tetap tampil).
  */
 export default function Error({
   error,
@@ -22,24 +22,14 @@ export default function Error({
   }, [error]);
 
   return (
-    <main
-      id="konten"
-      tabIndex={-1}
-      className="flex min-h-screen flex-col items-center justify-center bg-white px-5"
-    >
-      <div className="mb-6 flex items-center gap-2.5">
-        <Logo size={26} />
-        <span className="text-base font-extrabold tracking-tight text-black">
-          Status Kahade
-        </span>
-      </div>
+    <Container className="flex min-h-[60vh] items-center justify-center py-16">
       <EmptyState
         icon={WarningCircle}
         title="Ada yang tidak beres"
         description="Halaman status gagal dimuat. Coba muat ulang — bila masih gagal, laporkan ke tim Kahade lewat pusat bantuan."
         action={
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button onClick={reset} leftIcon={ArrowLeft}>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button type="button" onClick={() => reset()}>
               Coba lagi
             </Button>
             <ButtonLink
@@ -51,6 +41,6 @@ export default function Error({
           </div>
         }
       />
-    </main>
+    </Container>
   );
 }
