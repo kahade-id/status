@@ -1,11 +1,15 @@
-import { Alert, Badge, ButtonLink, Card, Divider, EmptyState, Icon, Logo } from "@kahade/ui";
 import {
-  ArrowSquareOut,
-  CheckCircle,
-  Headset,
-  Rss,
-  Wrench,
-} from "@phosphor-icons/react/dist/ssr";
+  Badge,
+  ButtonLink,
+  Container,
+  Eyebrow,
+  Section,
+  SectionHeader,
+  StatusDot,
+  TextLink,
+  type BadgeVariant,
+  type StatusTone,
+} from "@kahade/ui";
 import {
   incidents,
   maintenances,
@@ -18,32 +22,53 @@ import {
   type ServiceStatus,
 } from "@/lib/status";
 
+/* ── Pemetaan status → makna visual ────────────────────────────────────
+   Hijau/amber/merah HANYA untuk makna status (DESIGN-LANGUAGE §4). */
 
 const serviceStatusMeta: Record<
   ServiceStatus,
-  { dot: string; badge: "success" | "warning" | "danger"; label: string }
+  { tone: StatusTone; badge: BadgeVariant; label: string; desc: string }
 > = {
-  operational: { dot: "bg-green-500", badge: "success", label: "Operasional" },
-  degraded: { dot: "bg-amber-500", badge: "warning", label: "Gangguan" },
+  operational: {
+    tone: "positive",
+    badge: "success",
+    label: "Operasional",
+    desc: "Layanan berjalan normal tanpa kendala yang diketahui.",
+  },
+  degraded: {
+    tone: "caution",
+    badge: "warning",
+    label: "Gangguan",
+    desc: "Layanan berjalan tetapi ada gangguan sebagian — mis. lambat atau fitur tertentu terganggu.",
+  },
   down: {
-    dot: "bg-red-500",
+    tone: "critical",
     badge: "danger",
     label: "Tidak beroperasi",
+    desc: "Layanan tidak dapat digunakan untuk sementara waktu.",
   },
 };
 
-const overallMeta: Record<OverallStatus, { title: string; message: string }> = {
+const overallMeta: Record<
+  OverallStatus,
+  { tone: StatusTone; halo: string; title: string; message: string }
+> = {
   operational: {
+    tone: "positive",
+    halo: "bg-positive-soft",
     title: "Semua sistem operasional",
-    message:
-      "Seluruh layanan Kahade berjalan normal. Halaman ini diperbarui secara manual oleh tim Kahade.",
+    message: "Seluruh layanan Kahade berjalan normal.",
   },
   degraded: {
+    tone: "caution",
+    halo: "bg-caution-soft",
     title: "Sebagian layanan mengalami gangguan",
     message:
       "Sebagian layanan Kahade sedang mengalami gangguan. Tim kami sedang menanganinya — lihat detail di bawah.",
   },
   incident: {
+    tone: "caution",
+    halo: "bg-caution-soft",
     title: "Sedang ada insiden aktif",
     message:
       "Tim Kahade sedang menangani insiden yang berdampak pada layanan. Lihat riwayat insiden di bawah untuk pembaruan.",
@@ -52,7 +77,7 @@ const overallMeta: Record<OverallStatus, { title: string; message: string }> = {
 
 const incidentStatusMeta: Record<
   Incident["status"],
-  { badge: "success" | "warning"; label: string }
+  { badge: BadgeVariant; label: string }
 > = {
   resolved: { badge: "success", label: "Selesai" },
   monitoring: { badge: "warning", label: "Dipantau" },
@@ -61,100 +86,142 @@ const incidentStatusMeta: Record<
 
 const maintenanceStatusMeta: Record<
   Maintenance["status"],
-  { badge: "success" | "warning"; label: string }
+  { badge: BadgeVariant; label: string }
 > = {
   scheduled: { badge: "warning", label: "Terjadwal" },
   "in-progress": { badge: "warning", label: "Berlangsung" },
   completed: { badge: "success", label: "Selesai" },
 };
 
+const HISTORY_DAYS = 90;
+
+type Day = "up" | "down" | null;
+
+const dayColor: Record<"up" | "down" | "none", string> = {
+  up: "bg-positive",
+  down: "bg-critical",
+  none: "bg-line",
+};
+
 /**
- * Grafik 90 hari per layanan. Data-driven dari `service.uptimeHistory`
- * (null = belum ada data → tampil "—", tanpa mengarang).
- * Selalu menyertakan ringkasan sr-only agar terbaca screen reader.
+ * Bar riwayat 90 hari. Data-driven dari `service.uptimeHistory`
+ * (null = belum ada data). Tanpa data, bar tampil abu netral apa adanya —
+ * tidak ada persentase uptime yang dikarang.
  */
-function UptimeBars({ service }: { service: Service }) {
+function HistoryBar({ service }: { service: Service }) {
   const history = service.uptimeHistory;
-  if (!history || history.length === 0) {
-    return (
-      <span className="hidden text-sm text-neutral-500 tabular-nums sm:block">
-        —
-      </span>
-    );
-  }
-  const days = history.slice(-90);
-  const upDays = days.filter((d) => d === "up").length;
-  const downDays = days.filter((d) => d === "down").length;
-  const noDataDays = days.length - upDays - downDays;
+  const hasData = !!history && history.length > 0;
+  const recorded: Day[] = hasData ? history.slice(-HISTORY_DAYS) : [];
+  // Selalu 90 slot: hari tanpa catatan di awal diisi null (abu).
+  const days: Day[] = [
+    ...Array<Day>(HISTORY_DAYS - recorded.length).fill(null),
+    ...recorded,
+  ];
+  const upDays = recorded.filter((d) => d === "up").length;
+  const downDays = recorded.filter((d) => d === "down").length;
+  const noDataDays = HISTORY_DAYS - upDays - downDays;
+
+  const summary = !hasData
+    ? "Belum ada data pengukuran"
+    : service.uptime90d
+      ? `Uptime ${service.uptime90d}`
+      : `${upDays} dari ${recorded.length} hari operasional`;
+
   return (
-    <span className="hidden items-center gap-3 sm:flex">
-      <span
-        aria-hidden="true"
-        className="flex items-end gap-[2px]"
-        title={`${upDays} hari operasional, ${downDays} hari gangguan dari ${days.length} hari terakhir`}
-      >
+    <div className="mt-4">
+      <div aria-hidden="true" className="flex h-8 gap-px sm:gap-0.5">
         {days.map((d, i) => (
           <span
             key={i}
-            className={`w-[3px] rounded-full ${
-              d === "up"
-                ? "bg-green-500"
-                : d === "down"
-                  ? "bg-red-500"
-                  : "bg-neutral-200"
-            } ${d === "up" || d === "down" ? "h-6" : "h-3"}`}
+            className={`min-w-0 flex-1 rounded-full ${dayColor[d ?? "none"]}`}
           />
         ))}
-      </span>
-      {service.uptime90d && (
-        <span className="text-sm text-neutral-500 tabular-nums">
-          {service.uptime90d}
+      </div>
+      <p className="mt-2 flex items-center justify-between gap-3 text-caption text-fg-subtle">
+        <span aria-hidden="true">90 hari lalu</span>
+        <span className="text-center">
+          <span className="sr-only">Riwayat 90 hari: </span>
+          {summary}
+          {hasData && (
+            <span className="sr-only">
+              {`. ${upDays} hari operasional`}
+              {downDays > 0 && `, ${downDays} hari gangguan`}
+              {noDataDays > 0 && `, ${noDataDays} hari tanpa data`}.
+            </span>
+          )}
         </span>
-      )}
-      <span className="sr-only">
-        {service.name}: {upDays} dari {days.length} hari terakhir operasional
-        {downDays > 0 && `, ${downDays} hari gangguan`}
-        {noDataDays > 0 && `, ${noDataDays} hari tanpa data`}.
-      </span>
-    </span>
+        <span aria-hidden="true">Hari ini</span>
+      </p>
+    </div>
   );
 }
 
 function ServiceRow({ service }: { service: Service }) {
   const meta = serviceStatusMeta[service.status];
   return (
-    <li className="flex items-center gap-4 px-5 py-4 sm:px-6">
-      <span
-        aria-hidden="true"
-        className={`h-2.5 w-2.5 shrink-0 rounded-full ${meta.dot}`}
-      />
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold text-black">{service.name}</p>
-        <p className="truncate text-sm text-neutral-500">
-          {service.description}
-        </p>
+    <li className="border-b border-line py-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="text-h4 text-fg">{service.name}</h3>
+          <p className="mt-0.5 text-small text-fg-muted">
+            {service.description}
+          </p>
+        </div>
+        <Badge variant={meta.badge} className="mt-0.5 shrink-0 gap-2">
+          <StatusDot tone={meta.tone} />
+          {meta.label}
+        </Badge>
       </div>
-      <div className="flex shrink-0 items-center gap-4">
-        <UptimeBars service={service} />
-        <Badge variant={meta.badge}>{meta.label}</Badge>
+      <HistoryBar service={service} />
+    </li>
+  );
+}
+
+/** Baris kronologis (insiden / pemeliharaan): tanggal kiri, isi kanan. */
+function LogItem({
+  date,
+  isoDate,
+  title,
+  description,
+  badge,
+}: {
+  date: string;
+  isoDate?: string;
+  title: string;
+  description: string;
+  badge: { badge: BadgeVariant; label: string };
+}) {
+  return (
+    <li className="grid gap-2 border-b border-line py-6 sm:grid-cols-12 sm:gap-8">
+      <div className="sm:col-span-4">
+        <time
+          dateTime={isoDate}
+          className="text-small font-medium text-fg-subtle tabular-nums"
+        >
+          {date}
+        </time>
+      </div>
+      <div className="min-w-0 sm:col-span-8">
+        <Badge variant={badge.badge}>{badge.label}</Badge>
+        <h3 className="mt-3 text-h4 text-fg">{title}</h3>
+        <p className="mt-1 text-small text-fg-muted sm:text-body">
+          {description}
+        </p>
       </div>
     </li>
   );
 }
 
-function IncidentItem({ incident }: { incident: Incident }) {
-  const meta = incidentStatusMeta[incident.status];
+/** Keadaan kosong yang tenang: satu baris berhairline, tanpa ikon besar. */
+function QuietEmpty({ title, description }: { title: string; description: string }) {
   return (
-    <li className="px-5 py-5 sm:px-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="text-sm font-medium text-neutral-500">{incident.date}</p>
-        <Badge variant={meta.badge}>{meta.label}</Badge>
+    <div className="flex items-start gap-3 border-y border-line py-6">
+      <StatusDot tone="neutral" className="mt-2" />
+      <div>
+        <p className="font-semibold text-fg">{title}</p>
+        <p className="mt-1 text-small text-fg-muted">{description}</p>
       </div>
-      <p className="mt-1.5 font-semibold text-black">{incident.title}</p>
-      <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-        {incident.description}
-      </p>
-    </li>
+    </div>
   );
 }
 
@@ -177,292 +244,203 @@ const organizationJsonLd = {
 
 export default function StatusPage() {
   const meta = overallMeta[overall.status];
-  const alertVariant =
-    overall.status === "operational" ? "success" : "warning";
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(organizationJsonLd),
         }}
       />
-      <main
-        id="konten"
-        tabIndex={-1}
-        className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14"
-      >
-        {/* Header */}
-        <header className="flex items-center gap-3">
-          <Logo size={36} />
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-black">
-              Status Kahade
-            </h1>
-            <p className="text-sm text-neutral-500">
-              Status operasional layanan Kahade
-            </p>
-          </div>
-        </header>
 
-        {/* Banner status keseluruhan */}
-        <div className="mt-8">
-          <Alert variant={alertVariant} title={meta.title}>
-            {meta.message}{" "}
-            <span className="text-neutral-500">
-              Diperbarui {overall.updatedAt} (WIB).
+      {/* ── Kepala: status keseluruhan ─────────────────────────────── */}
+      <header className="border-b border-line">
+        <Container size="narrow" className="pt-10 pb-12 sm:pt-14 sm:pb-14 lg:pt-20 lg:pb-16">
+          <Eyebrow className="mb-5">Status layanan Kahade</Eyebrow>
+          <h1 className="flex items-start gap-[0.3em] text-h1 text-fg">
+            {/* Ukuran halo dalam em agar selalu sejajar baris pertama judul. */}
+            <span
+              aria-hidden="true"
+              className={`mt-[0.175em] inline-flex size-[0.7em] shrink-0 items-center justify-center rounded-full ${meta.halo}`}
+            >
+              <StatusDot tone={meta.tone} className="scale-150 lg:scale-[1.75]" />
             </span>
-          </Alert>
+            <span className="min-w-0">{meta.title}</span>
+          </h1>
+          <p className="mt-5 max-w-[40rem] text-lead text-fg-muted sm:mt-6">
+            {meta.message}
+          </p>
+          <p className="mt-4 max-w-[40rem] text-body text-fg-muted">
+            Kahade masih dalam tahap pengembangan dan dijadwalkan meluncur pada{" "}
+            <strong className="font-semibold whitespace-nowrap text-fg">
+              8 Desember 2026
+            </strong>.
+            Halaman ini menampilkan kondisi terkini layanan Kahade.
+          </p>
+          <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-line pt-6 sm:mt-12 sm:flex sm:flex-wrap sm:gap-x-12">
+            <div className="min-w-0">
+              <dt className="text-caption text-fg-subtle">Pembaruan terakhir</dt>
+              <dd className="mt-1 text-small font-semibold text-fg tabular-nums">
+                {overall.updatedAt} (WIB)
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-caption text-fg-subtle">Cara pembaruan</dt>
+              <dd className="mt-1 text-small font-semibold text-fg">
+                Manual oleh tim Kahade
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-caption text-fg-subtle">Zona waktu</dt>
+              <dd className="mt-1 text-small font-semibold text-fg">
+                WIB (UTC+7)
+              </dd>
+            </div>
+          </dl>
+        </Container>
+      </header>
+
+      {/* ── 01 Layanan ─────────────────────────────────────────────── */}
+      <Section id="layanan" containerSize="narrow" spacing="sm">
+        <SectionHeader
+          index="01"
+          eyebrow="Layanan"
+          title="Status per layanan"
+          size="h3"
+          description="Kondisi saat ini dan riwayat 90 hari terakhir. Bar abu-abu berarti belum ada data pengukuran."
+        />
+        <ul className="mt-8 border-t border-line">
+          {services.map((s) => (
+            <ServiceRow key={s.name} service={s} />
+          ))}
+        </ul>
+
+        <div className="mt-10">
+          <h3 className="text-small font-semibold text-fg">Arti status</h3>
+          <dl className="mt-4 grid gap-x-10 gap-y-4 sm:grid-cols-2">
+            {(Object.keys(serviceStatusMeta) as ServiceStatus[]).map((key) => {
+              const m = serviceStatusMeta[key];
+              return (
+                <div key={key}>
+                  <dt className="flex items-center gap-2.5 text-small font-semibold text-fg">
+                    <StatusDot tone={m.tone} />
+                    {m.label}
+                  </dt>
+                  <dd className="mt-0.5 pl-[18px] text-small text-fg-muted">{m.desc}</dd>
+                </div>
+              );
+            })}
+            <div>
+              <dt className="flex items-center gap-2.5 text-small font-semibold text-fg">
+                <span aria-hidden="true" className="h-3.5 w-2 shrink-0 rounded-full bg-line" />
+                Belum ada data
+              </dt>
+              <dd className="mt-0.5 pl-[18px] text-small text-fg-muted">
+                Bar abu-abu: belum ada data pengukuran untuk hari tersebut.
+              </dd>
+            </div>
+          </dl>
         </div>
+      </Section>
 
-        {/* Penjelasan halaman */}
-        <p className="mt-6 text-sm leading-relaxed text-neutral-500">
-          Halaman ini menampilkan kondisi terkini layanan Kahade. Kahade
-          masih dalam tahap pengembangan dan dijadwalkan meluncur pada{" "}
-          <span className="font-semibold text-neutral-700">
-            8 Desember 2026
-          </span>
-          . Semua waktu di halaman ini dalam WIB.
-        </p>
-
-        {/* Daftar layanan */}
-        <section aria-labelledby="layanan" className="mt-10">
-          <h2
-            id="layanan"
-            className="text-lg font-bold tracking-tight text-black"
-          >
-            Layanan
-          </h2>
-          {/* Audit batch 8 (A.1): p-0 di className TIDAK menimpa p-6 bawaan
-              Card di Tailwind v4 (.p-6 ter-generate setelah .p-0) — pakai
-              inline style agar baris daftar benar-benar edge-to-edge. */}
-          <Card className="mt-4" style={{ padding: 0 }}>
-            <ul className="divide-y divide-neutral-100">
-              {services.map((s) => (
-                <ServiceRow key={s.name} service={s} />
+      {/* ── 02 Insiden ─────────────────────────────────────────────── */}
+      <Section id="insiden" containerSize="narrow" spacing="sm" divider>
+        <SectionHeader index="02" eyebrow="Insiden" title="Riwayat insiden" size="h3" />
+        <div className="mt-8">
+          {incidents.length === 0 ? (
+            <QuietEmpty
+              title="Belum ada insiden"
+              description="Tidak ada insiden layanan yang tercatat."
+            />
+          ) : (
+            <ul className="border-t border-line">
+              {incidents.map((i) => (
+                <LogItem
+                  key={`${i.date}-${i.title}`}
+                  date={i.date}
+                  isoDate={i.isoDate}
+                  title={i.title}
+                  description={i.description}
+                  badge={incidentStatusMeta[i.status]}
+                />
               ))}
             </ul>
-            <div className="border-t border-neutral-100 px-5 py-3 sm:px-6">
-              <p className="text-xs text-neutral-500">
-                Grafik 90 hari · “—” berarti belum ada data pengukuran
-              </p>
-            </div>
-          </Card>
-        </section>
+          )}
+        </div>
+      </Section>
 
-        {/* Arti status */}
-        <section aria-labelledby="arti-status" className="mt-10">
-          <h2
-            id="arti-status"
-            className="text-lg font-bold tracking-tight text-black"
-          >
-            Arti status
-          </h2>
-          <Card className="mt-4">
-            <dl className="space-y-3">
-              {(
-                [
-                  {
-                    status: "operational" as ServiceStatus,
-                    desc: "Layanan berjalan normal tanpa kendala yang diketahui.",
-                  },
-                  {
-                    status: "degraded" as ServiceStatus,
-                    desc: "Layanan berjalan tetapi ada gangguan sebagian — mis. lambat atau fitur tertentu terganggu.",
-                  },
-                  {
-                    status: "down" as ServiceStatus,
-                    desc: "Layanan tidak dapat digunakan untuk sementara waktu.",
-                  },
-                ]
-              ).map((item) => {
-                const m = serviceStatusMeta[item.status];
-                return (
-                  <div key={item.status} className="flex items-start gap-3">
-                    <span
-                      aria-hidden="true"
-                      className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${m.dot}`}
-                    />
-                    <div>
-                      <dt className="font-semibold text-black">{m.label}</dt>
-                      <dd className="text-sm text-neutral-500">{item.desc}</dd>
-                    </div>
-                  </div>
-                );
-              })}
-            </dl>
-          </Card>
-        </section>
+      {/* ── 03 Pemeliharaan ────────────────────────────────────────── */}
+      <Section id="pemeliharaan" containerSize="narrow" spacing="sm" divider>
+        <SectionHeader
+          index="03"
+          eyebrow="Pemeliharaan"
+          title="Jadwal pemeliharaan"
+          size="h3"
+        />
+        <div className="mt-8">
+          {maintenances.length === 0 ? (
+            <QuietEmpty
+              title="Belum ada pemeliharaan terjadwal"
+              description="Jadwal pemeliharaan akan diumumkan di sini sebelumnya."
+            />
+          ) : (
+            <ul className="border-t border-line">
+              {maintenances.map((m) => (
+                <LogItem
+                  key={`${m.date}-${m.title}`}
+                  date={`${m.date} (WIB)`}
+                  isoDate={m.isoDate}
+                  title={m.title}
+                  description={m.description}
+                  badge={maintenanceStatusMeta[m.status]}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      </Section>
 
-        {/* Riwayat insiden */}
-        <section aria-labelledby="insiden" className="mt-10">
-          <h2
-            id="insiden"
-            className="text-lg font-bold tracking-tight text-black"
-          >
-            Riwayat insiden
-          </h2>
-          <Card className="mt-4" style={{ padding: 0 }}>
-            {incidents.length === 0 ? (
-              <EmptyState
-                icon={CheckCircle}
-                title="Belum ada insiden"
-                description="Tidak ada insiden layanan yang tercatat."
-              />
-            ) : (
-              <ul className="divide-y divide-neutral-100">
-                {incidents.map((i) => (
-                  <IncidentItem
-                    key={`${i.date}-${i.title}`}
-                    incident={i}
-                  />
-                ))}
-              </ul>
-            )}
-          </Card>
-        </section>
+      {/* ── 04 Langganan ───────────────────────────────────────────── */}
+      <Section id="langganan" containerSize="narrow" spacing="sm" divider>
+        <SectionHeader
+          index="04"
+          eyebrow="Langganan"
+          title="Ikuti pembaruan"
+          size="h3"
+          description="Ikuti insiden dan jadwal pemeliharaan lewat RSS, atau email kami untuk didaftarkan ke notifikasi."
+        />
+        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-1">
+          <TextLink href="/feed.xml">Feed RSS</TextLink>
+          <TextLink href="mailto:halo@kahade.id?subject=Berlangganan%20pembaruan%20status%20Kahade">
+            Daftar via email
+          </TextLink>
+        </div>
+      </Section>
 
-        {/* Jadwal pemeliharaan */}
-        <section aria-labelledby="pemeliharaan" className="mt-10">
-          <h2
-            id="pemeliharaan"
-            className="text-lg font-bold tracking-tight text-black"
-          >
-            Jadwal pemeliharaan
-          </h2>
-          <Card className="mt-4" style={{ padding: 0 }}>
-            {maintenances.length === 0 ? (
-              <EmptyState
-                icon={Wrench}
-                title="Belum ada pemeliharaan terjadwal"
-                description="Jadwal pemeliharaan akan diumumkan di sini sebelumnya."
-              />
-            ) : (
-              <ul className="divide-y divide-neutral-100">
-                {maintenances.map((m) => {
-                  const meta = maintenanceStatusMeta[m.status];
-                  return (
-                    <li
-                      key={`${m.date}-${m.title}`}
-                      className="px-5 py-5 sm:px-6"
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium text-neutral-500">
-                          {m.date} (WIB)
-                        </p>
-                        <Badge variant={meta.badge}>{meta.label}</Badge>
-                      </div>
-                      <p className="mt-1.5 font-semibold text-black">
-                        {m.title}
-                      </p>
-                      <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-                        {m.description}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Card>
-        </section>
-
-        {/* Lapor gangguan & berlangganan */}
-        <section aria-labelledby="tetap-terinformasi" className="mt-10">
-          <h2
-            id="tetap-terinformasi"
-            className="text-lg font-bold tracking-tight text-black"
-          >
-            Tetap terinformasi
-          </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Card className="flex items-center gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100">
-                <Icon icon={Rss} size={22} className="text-neutral-700" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold tracking-tight text-black">
-                  Berlangganan pembaruan
-                </p>
-                <p className="mt-0.5 text-sm text-neutral-500">
-                  Ikuti insiden & jadwal pemeliharaan via RSS, atau email
-                  kami untuk didaftarkan ke notifikasi.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <ButtonLink href="/feed.xml">Feed RSS</ButtonLink>
-                  <ButtonLink
-                    variant="secondary"
-                    href="mailto:halo@kahade.id?subject=Berlangganan%20pembaruan%20status%20Kahade"
-                  >
-                    Daftar via email
-                  </ButtonLink>
-                </div>
-              </div>
-            </Card>
-            <Card className="flex items-center gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100">
-                <Icon icon={Headset} size={22} className="text-neutral-700" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold tracking-tight text-black">
-                  Mengalami gangguan?
-                </p>
-                <p className="mt-0.5 text-sm text-neutral-500">
-                  Laporkan kendala yang kamu alami ke tim Kahade melalui
-                  pusat bantuan.
-                </p>
-                <div className="mt-3">
-                  <ButtonLink href="https://bantuan.kahade.id/kontak">
-                    Lapor gangguan
-                  </ButtonLink>
-                </div>
-              </div>
-            </Card>
+      {/* ── Ajakan penutup ─────────────────────────────────────────── */}
+      <section className="bg-surface-inverse text-white">
+        <Container
+          size="narrow"
+          className="flex flex-col gap-8 py-14 sm:py-16 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <div className="max-w-md">
+            <h2 className="text-h3 text-white">Mengalami gangguan?</h2>
+            <p className="mt-3 text-body-lg text-white/70">
+              Laporkan kendala yang kamu alami ke tim Kahade melalui pusat
+              bantuan.
+            </p>
           </div>
-        </section>
-
-        <Divider className="my-10" />
-
-        {/* Catatan kaki */}
-        <footer className="text-center text-sm text-neutral-500">
-          <nav
-            aria-label="Situs Kahade"
-            className="mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
-          >
-            {[
-              { label: "kahade.id", href: "https://kahade.id" },
-              { label: "Karir", href: "https://karir.kahade.id" },
-              { label: "Legalitas", href: "https://legal.kahade.id" },
-              { label: "Bantuan", href: "https://bantuan.kahade.id" },
-              { label: "Investor", href: "https://investor.kahade.id" },
-              { label: "Artikel", href: "https://artikel.kahade.id" },
-            ].map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="font-medium text-neutral-600 transition-colors hover:text-black"
-              >
-                {l.label}
-              </a>
-            ))}
-          </nav>
-          <p>
-            Halaman ini diperbarui manual oleh tim Kahade. Butuh bantuan?{" "}
-            <a
-              href="https://bantuan.kahade.id"
-              className="inline-flex items-center gap-1 font-semibold text-black underline-offset-4 hover:underline"
-            >
-              Kunjungi Bantuan
-              <Icon icon={ArrowSquareOut} size={14} />
-            </a>
-          </p>
-          <p className="mt-3 text-xs text-neutral-500">
-            © {new Date().getFullYear()} PT Kawal Hak Dengan Aman · Kahade
-            adalah aplikasi jual-beli pengguna ke pengguna yang
-            tampilannya seperti media sosial.
-          </p>
-        </footer>
-      </main>
-    </div>
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="https://bantuan.kahade.id/kontak" variant="inverse">
+              Lapor gangguan
+            </ButtonLink>
+            <ButtonLink href="https://bantuan.kahade.id/" variant="inverseSecondary">
+              Pusat bantuan
+            </ButtonLink>
+          </div>
+        </Container>
+      </section>
+    </>
   );
 }

@@ -1,8 +1,18 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import { SiteFooter } from "@kahade/ui";
+import { Header } from "@/components/site/Header";
 
-const GOOGLE_FONTS_URL =
-  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap";
+// Plus Jakarta Sans self-hosted via next/font: tanpa CSS pihak ketiga yang
+// memblokir render. Variabel dipasang di <html> agar token --font-sans di
+// :root ikut terisi (memasangnya di <body> membuat font jatuh ke fallback).
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Status Layanan Kahade — Uptime & Insiden",
@@ -52,15 +62,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
+    <html lang="id" className={jakarta.variable} data-scroll-behavior="smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link href={GOOGLE_FONTS_URL} rel="stylesheet" />
         <link
           rel="alternate"
           type="application/rss+xml"
@@ -68,16 +71,19 @@ export default function RootLayout({
           href="/feed.xml"
         />
       </head>
-      <body>
-        {/* Dimensi A2 audit: skip-to-content link. Target #konten ada di
-            page.tsx, not-found.tsx, dan error.tsx. */}
-        <a
-          href="#konten"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-black focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white"
-        >
+      <body className="flex min-h-screen flex-col">
+        <a href="#konten-utama" className="kh-skip-link">
           Lewati ke konten utama
         </a>
-        {children}
+        <Header />
+        <main id="konten-utama" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
+        <SiteFooter
+          site="status"
+          linkAs={Link}
+          note="Halaman status ini diperbarui manual oleh tim Kahade."
+        />
       </body>
     </html>
   );

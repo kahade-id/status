@@ -3,21 +3,9 @@
 @import "@kahade/ui/styles/base.css";
 
 /* WAJIB: Tailwind v4 tidak men-scan node_modules — tanpa ini, utility class
-   yang hanya dipakai di source @kahade/ui (mis. pl-11 di SearchField) tidak
-   ter-generate dan layout DS rusak diam-diam. */
+   yang hanya dipakai di source @kahade/ui tidak ter-generate. */
 @source "../node_modules/@kahade/ui/src";
 
-/* ── Dimensi A3 audit: indikator fokus keyboard yang jelas untuk semua
-   elemen interaktif native (mis. <a> di footer). Komponen DS (Button,
-   ButtonLink) punya ring focus-visible sendiri via `focus-visible:ring-*`
-   yang lebih spesifik sehingga tidak tertimpa aturan ini. */
-:focus-visible {
-  outline: 2px solid #000000;
-  outline-offset: 2px;
-}
-
-/* Target skip-to-content (#konten, tabindex="-1"): hanya menerima fokus
-   programatik dari aktivasi skip link, jadi tidak perlu outline sendiri. */
-#konten:focus {
-  outline: none;
+html {
+  scroll-behavior: smooth;
 }
